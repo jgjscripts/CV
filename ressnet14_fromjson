@@ -1,0 +1,18 @@
+import tensorflow as tf
+from tensorflow.keras.models import model_from_json
+
+def load_model_from_json(json_file_path):
+    with open(json_file_path, 'r') as json_file:
+        architecture = json_file.read()
+
+    loaded_model = model_from_json(architecture)
+    return loaded_model
+
+# Path to the JSON file containing the model architecture
+json_file_path = "resnet_architecture.json"
+
+# Load the model architecture from the JSON file
+loaded_model = load_model_from_json(json_file_path)
+
+# Print a summary of the loaded model
+loaded_model.summary()
