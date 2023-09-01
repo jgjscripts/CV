@@ -55,3 +55,25 @@ for i, image_path in enumerate(image_paths):
         print(f"Predicted Probability for Class {j}: {class_probability:.4f}")
 
     print()
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Assuming you have the class_probabilities array
+
+# Get the number of classes and the number of images
+num_classes, num_images = class_probabilities.shape
+
+# Plot the distribution of predicted class probabilities for each class
+for class_idx in range(num_classes):
+    class_probs = class_probabilities[class_idx, :]
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(class_probs, bins=20, alpha=0.5)
+    plt.xlabel("Probability")
+    plt.ylabel("Frequency")
+    plt.title(f"Distribution of Predicted Probabilities for Class {class_idx}")
+    plt.tight_layout()
+    plt.show()
+
