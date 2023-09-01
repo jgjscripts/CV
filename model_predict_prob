@@ -1,0 +1,26 @@
+import tensorflow as tf
+import cv2
+import numpy as np
+
+# Load a pre-trained model
+model = tf.keras.applications.ResNet50(weights='imagenet')
+
+# Load and preprocess an image for prediction
+image_path = 'path/to/your/image.jpg'
+image = cv2.imread(image_path)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Ensure the correct color format
+image = cv2.resize(image, (224, 224))  # Resize the image to match model's input size
+image = tf.keras.applications.resnet50.preprocess_input(image)  # Preprocess according to the model's requirements
+image = np.expand_dims(image, axis=0)  # Add batch dimension
+
+# Make a prediction
+predictions = model.predict(image)
+
+# Decode the prediction (e.g., for ImageNet classes)
+decoded_predictions = tf.keras.applications.resnet50.decode_predictions(predictions)
+
+# Display the top predicted class and its probability
+top_prediction = decoded_predictions[0][0]
+class_label, class_description, class_probability = top_prediction
+print(f"Predicted Class: {class_label} ({class_description})")
+print(f"Probability: {class_probability:.4f}")
