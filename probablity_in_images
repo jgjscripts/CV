@@ -1,0 +1,57 @@
+import tensorflow as tf
+import numpy as np
+import cv2
+
+# Load a pre-trained model
+model = tf.keras.applications.ResNet50(weights='imagenet')
+
+# Define the batch size and create an ImageDataGenerator for the test data
+batch_size = 32
+
+test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1.0/255)
+test_generator = test_datagen.flow_from_directory(
+    'path/to/your/test/dataset',
+    target_size=(224, 224),
+    batch_size=batch_size,
+    class_mode='categorical',
+    shuffle=False
+)
+
+# Get the number of classes from the generator
+num_classes = test_generator.num_classes
+
+# Create lists to store image paths, class labels, and predicted probabilities
+image_paths = []
+class_labels = []
+class_probabilities = [[] for _ in range(num_classes)]
+
+# Iterate over batches in the test generator and predict probabilities
+for i in range(len(test_generator)):
+    batch_images, batch_labels = test_generator[i]
+    batch_predictions = model.predict(batch_images)
+
+    for j in range(len(batch_images)):
+        # Get the image path from the generator (assuming it's included in the generator)
+        image_paths.append(test_generator.filepaths[i * batch_size + j])
+
+        # Get the true class label
+        true_label = np.argmax(batch_labels[j])
+        class_labels.append(true_label)
+
+        # Get the predicted class probabilities
+        for k in range(num_classes):
+            class_probabilities[k].append(batch_predictions[j][k])
+
+# Convert class_probabilities to a NumPy array
+class_probabilities = np.array(class_probabilities)
+
+# Print the predictions for each image
+for i, image_path in enumerate(image_paths):
+    print(f"Image: {image_path}")
+    print(f"True Class: {class_labels[i]}")
+
+    for j in range(num_classes):
+        class_probability = class_probabilities[j][i]
+        print(f"Predicted Probability for Class {j}: {class_probability:.4f}")
+
+    print()
