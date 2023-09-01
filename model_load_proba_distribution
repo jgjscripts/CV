@@ -1,5 +1,77 @@
 import tensorflow as tf
 import numpy as np
+from scipy.stats import ks_2samp
+
+# Load a pre-trained model
+model = tf.keras.applications.ResNet50(weights='imagenet')
+
+# Load your reference and new test datasets into TensorFlow Datasets or generators
+reference_data_dir = "path/to/reference/dataset"
+new_data_dir = "path/to/new/dataset"
+batch_size = 32
+
+# Create TensorFlow Datasets for the reference and new data
+reference_dataset = tf.keras.utils.image_dataset_from_directory(
+    reference_data_dir,
+    image_size=(224, 224),
+    batch_size=batch_size,
+    label_mode=None,  # We want to predict, so no labels
+    shuffle=False
+)
+
+new_dataset = tf.keras.utils.image_dataset_from_directory(
+    new_data_dir,
+    image_size=(224, 224),
+    batch_size=batch_size,
+    label_mode=None,
+    shuffle=False
+)
+
+# Create an empty list to store predicted probabilities for both datasets
+reference_predictions = []
+new_predictions = []
+
+# Iterate over batches in the reference dataset
+for images in reference_dataset:
+    predictions = model.predict(images)
+    reference_predictions.extend(predictions)
+
+# Iterate over batches in the new dataset
+for images in new_dataset:
+    predictions = model.predict(images)
+    new_predictions.extend(predictions)
+
+# Convert predictions to NumPy arrays
+reference_predictions = np.array(reference_predictions)
+new_predictions = np.array(new_predictions)
+
+# Perform KS test for each class
+for class_idx, class_name in enumerate(model.predict(images).shape[1]):
+    reference_class_probs = reference_predictions[:, class_idx]
+    new_class_probs = new_predictions[:, class_idx]
+
+    # Perform KS test
+    ks_statistic, ks_p_value = ks_2samp(reference_class_probs, new_class_probs)
+
+    # Print results
+    print(f"KS Test for Class {class_name}:")
+    print(f"KS Statistic: {ks_statistic}")
+    print(f"P-Value: {ks_p_value}")
+
+    # You can set a significance level and check for drift based on the p-value
+    alpha = 0.05
+    if ks_p_value < alpha:
+        print(f"Drift detected for Class {class_name}")
+    else:
+        print(f"No drift detected for Class {class_name}")
+
+
+
+#############################################################################################################################################################
+#############################################################################################################################################################
+
+import tensorflow as tf
+import numpy as np
 import matplotlib.pyplot as plt
 
 # Load a pre-trained model
