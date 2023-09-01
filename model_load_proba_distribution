@@ -1,4 +1,52 @@
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load a pre-trained model
+model = tf.keras.applications.ResNet50(weights='imagenet')
+
+# Load your test dataset into a TensorFlow Dataset or generator
+test_data_dir = "path/to/your/test/dataset"
+batch_size = 32
+
+# Create a TensorFlow Dataset for the test data
+test_dataset = tf.keras.utils.image_dataset_from_directory(
+    test_data_dir,
+    image_size=(224, 224),
+    batch_size=batch_size,
+    label_mode=None,  # We want to predict, so no labels
+    shuffle=False  # Don't shuffle the data to match predictions with filenames
+)
+
+# Create an empty list to store predicted probabilities
+all_predictions = []
+
+# Iterate over batches in the test dataset
+for step, images in enumerate(test_dataset):
+    # Predict using the model
+    predictions = model.predict(images)
+    all_predictions.extend(predictions)
+
+# Convert predictions to a NumPy array
+all_predictions = np.array(all_predictions)
+
+# Plot the distribution of predicted class probabilities
+plt.figure(figsize=(10, 6))
+for class_idx, class_name in enumerate(model.predict(images).shape[1]):
+    class_probs = all_predictions[:, class_idx]
+    plt.hist(class_probs, bins=20, alpha=0.5, label=class_name)
+
+plt.xlabel("Probability")
+plt.ylabel("Frequency")
+plt.title("Distribution of Predicted Class Probabilities")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+#############################################################################################################################################################
+#############################################################################################################################################################
+
+import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import matplotlib.pyplot as plt
